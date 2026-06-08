@@ -55,21 +55,24 @@ outputs:
         - {{ pin_subpackage('libfreetype' ~ so_name_major, exact=True) }}
     test:
       commands:
-        - ${PREFIX}/bin/freetype-config --version  # [not win]
-      # Need these things
-        - test -f ${PREFIX}/lib/libfreetype{{ SHLIB_EXT }}                       # [unix]
-        - test -f ${PREFIX}/lib/libfreetype.{{ so_name_major }}{{ SHLIB_EXT }}   # [osx]
-        - test -f ${PREFIX}/lib/libfreetype{{ SHLIB_EXT }}.{{ so_name_major }}   # [linux]
-        - test -f ${PREFIX}/lib/libfreetype{{ SHLIB_EXT }}.{{ so_name }}         # [linux]
-        - if not exist %PREFIX%\\Library\\lib\\freetype.lib exit 1               # [win]
-        - test -f ${PREFIX}/include/freetype2/freetype/freetype.h                # [unix]
-        - if not exist %PREFIX%\\Library\\include\\freetype\\freetype.h exit 1   # [win]
-        - test -f ${PREFIX}/lib/pkgconfig/freetype2.pc                            # [unix]
-        - if not exist %PREFIX%\\Library\\lib\\pkgconfig\\freetype2.pc exit 1     # [win]
-        - if not exist %PREFIX%\\Library\\lib\\cmake\\freetype\\freetype-config.cmake exit 1     # [win]
-        - test -f ${PREFIX}/bin/freetype-config                               # [unix]
-      # Exclude these things
-        - test ! -f ${PREFIX}/lib/libfreetype.a                               # [unix]
+        # headers
+        - test -f ${PREFIX}/include/freetype2/freetype/freetype.h       # [unix]
+        - if not exist %LIBRARY_INC%\freetype\freetype.h exit 1         # [win]
+
+        # access to shared libraries (symlink resp. import lib; impl. is in libfreetype)
+        - test -f ${PREFIX}/lib/libfreetype{{ SHLIB_EXT }}              # [unix]
+        - if not exist %LIBRARY_LIB%\freetype.lib exit 1                # [win]
+
+        # absence of static libraries
+        - test ! -f ${PREFIX}/lib/libfreetype.a                         # [unix]
+
+        # binaries
+        - ${PREFIX}/bin/freetype-config --version                       # [unix]
+
+        # metadata
+        - test -f ${PREFIX}/lib/pkgconfig/freetype2.pc                  # [unix]
+        - if not exist %LIBRARY_LIB%\pkgconfig\freetype2.pc exit 1      # [win]
+        - if not exist %LIBRARY_LIB%\cmake\freetype\freetype-config.cmake exit 1  # [win]
 
   - name: libfreetype
     requirements:
@@ -106,7 +109,7 @@ outputs:
         - test -f ${PREFIX}/lib/libfreetype.{{ so_name_major }}{{ SHLIB_EXT }}   # [osx]
         - test -f ${PREFIX}/lib/libfreetype{{ SHLIB_EXT }}.{{ so_name_major }}   # [linux]
         - test -f ${PREFIX}/lib/libfreetype{{ SHLIB_EXT }}.{{ so_name }}         # [linux]
-        - if not exist %PREFIX%\\Library\\bin\\freetype.dll exit 1               # [win]
+        - if not exist %LIBRARY_BIN%\freetype.dll exit 1                         # [win]
     about:
       license: GPL-2.0-only OR FTL
       summary: The libfreetype runtime library.
