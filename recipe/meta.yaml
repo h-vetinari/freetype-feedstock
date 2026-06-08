@@ -12,7 +12,7 @@ source:
   sha256: e61b31ab26358b946e767ed7eb7f4bb2e507da1cfefeb7a8861ace7fd5c899a1
 
 build:
-  number: 0
+  number: 1
 
 requirements:
   build:
@@ -53,7 +53,11 @@ outputs:
       run:
         - {{ pin_subpackage('libfreetype', exact=True) }}
         - {{ pin_subpackage('libfreetype' ~ so_name_major, exact=True) }}
+        # for pkg-config metadata
+        - zlib  # [win]
     test:
+      requires:
+        - pkg-config
       commands:
         # headers
         - test -f ${PREFIX}/include/freetype2/freetype/freetype.h       # [unix]
@@ -73,6 +77,9 @@ outputs:
         - test -f ${PREFIX}/lib/pkgconfig/freetype2.pc                  # [unix]
         - if not exist %LIBRARY_LIB%\pkgconfig\freetype2.pc exit 1      # [win]
         - if not exist %LIBRARY_LIB%\cmake\freetype\freetype-config.cmake exit 1  # [win]
+
+        # test pkg-config metadata is satisfied
+        - pkg-config --print-errors freetype2
 
   - name: libfreetype
     requirements:
